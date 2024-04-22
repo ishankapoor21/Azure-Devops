@@ -1,0 +1,39 @@
+
+trigger:
+- none
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- task: TerraformInstaller@1
+  inputs:
+    terraformVersion: 'latest'
+
+- task: TerraformTaskV4@4
+  inputs:
+    provider: 'azurerm'
+    command: 'init'
+    workingDirectory: 'Storage_Account'
+    commandOptions: '-var-file=./Environment/SA.tfvars'
+    backendServiceArm: 'SERVICE_CONNECTION_NAME'
+    backendAzureRmResourceGroupName: 'RESOURCE_GROUP_NAME'
+    backendAzureRmStorageAccountName: 'STORAGE_ACCOUNT_NAME'
+    backendAzureRmContainerName: 'CONTAINER_NAME'
+    backendAzureRmKey: 'TERRAFORM_STATEFILE_NAME'
+    
+- task: TerraformTaskV4@4
+  inputs:
+    provider: 'azurerm'
+    command: 'plan'
+    workingDirectory: 'Storage_Account'
+    commandOptions: '-var-file=../Environment/SA.tfvars'
+    environmentServiceNameAzureRM: 'SERVICE_CONNECTION_NAME'
+
+- task: TerraformTaskV4@4
+  inputs:
+    provider: 'azurerm'
+    command: 'apply'
+    workingDirectory: 'Storage_Account'
+    commandOptions: '-var-file=../Environment/SA.tfvars'
+    environmentServiceNameAzureRM: 'SERVICE_CONNECTION_NAME'

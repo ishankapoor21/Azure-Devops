@@ -1,0 +1,49 @@
+trigger:
+- none
+
+pool:
+  vmImage: ubuntu-latest
+
+parameters:
+  - name: storageAccountName
+    type: string
+    displayName: "Storage Account Name"
+
+variables:
+  SA_Name: ${{parameters.storageAccountName}}
+
+ 
+steps:
+
+- task: TerraformInstaller@1
+  inputs:
+    terraformVersion: 'latest'
+
+- task: TerraformTaskV4@4
+  inputs:
+    provider: 'azurerm'
+    command: 'init'
+    workingDirectory: 'Storage_Account'
+    commandOptions: '-var "SA_Name=$(SA_Name)"'
+    backendServiceArm: 'SERVICE_CONNECTION_NAME'
+    backendAzureRmResourceGroupName: 'RESOURCE_GROUP_NAME'
+    backendAzureRmStorageAccountName: 'STORAGE_ACCOUNT_NAME'
+    backendAzureRmContainerName: 'CONTAINER_NAME'
+    backendAzureRmKey: 'TERRAFORM_STATEFILE_NAME'
+    
+- task: TerraformTaskV4@4
+  inputs:
+    provider: 'azurerm'
+    command: 'plan'
+    workingDirectory: 'Storage_Account'
+    commandOptions: '-var "SA_Name=$(SA_Name)"'
+    environmentServiceNameAzureRM: 'SERVICE_CONNECTION_NAME'
+
+- task: TerraformTaskV4@4
+  inputs:
+    provider: 'azurerm'
+    command: 'apply'
+    workingDirectory: 'Storage_Account'
+    commandOptions: '-var "SA_Name=$(SA_Name)"'
+    environmentServiceNameAzureRM: 'SERVICE_CONNECTION_NAME'
+

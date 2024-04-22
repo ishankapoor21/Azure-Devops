@@ -1,0 +1,32 @@
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- task: CopyFiles@2
+  inputs:
+    Contents: '**/*.html'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'htmlapp'
+    publishLocation: 'Container'
+
+- task: DownloadBuildArtifacts@1
+  inputs:
+    buildType: 'current'
+    downloadType: 'specific'
+    itemPattern: '**/*.html'
+    downloadPath: '$(System.ArtifactsDirectory)'
+
+- task: AzureWebApp@1
+  inputs:
+    azureSubscription: 'SERVICE_CONNECTION_NAME'
+    appType: 'webAppLinux'
+    appName: 'AZURE_APP_SERVICE_NAME'
+    package: '$(System.ArtifactsDirectory)/htmlapp'
+    runtimeStack: 'PYTHON|3.10'
